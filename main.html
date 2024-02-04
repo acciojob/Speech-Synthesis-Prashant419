@@ -1,72 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Voiceinator 5000</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Voiceinator 5000</title>
 </head>
 <body>
-    <h1>The Voiceinator 5000</h1>
-    <label for="voice">Select a voice:</label>
-    <select name="voice" id="voice"></select>
-    <br>
-    <label for="rate">Rate:</label>
-    <input type="range" name="rate" id="rate" min="0.5" max="2" step="0.1" value="1">
-    <br>
-    <label for="pitch">Pitch:</label>
-    <input type="range" name="pitch" id="pitch" min="0" max="2" step="0.1" value="1">
-    <br>
-    <textarea name="text" id="text" rows="4" cols="50">Hello! I love JavaScript 👍</textarea>
-    <br>
-    <button id="start">Speak</button>
-    <button id="stop">Stop!</button>
+  <h1>The Voiceinator 5000</h1>
+  <label for="voice">Select a voice:</label>
+  <select name="voice" id="voice"></select>
+  <br>
+  <label for="rate">Rate:</label>
+  <input type="range" name="rate" id="rate" min="0.5" max="2" step="0.1" value="1">
+  <br>
+  <label for="pitch">Pitch:</label>
+  <input type="range" name="pitch" id="pitch" min="0" max="2" step="0.1" value="1">
+  <br>
+  <textarea name="text" id="text" rows="4" cols="50">Hello! I love JavaScript </textarea>
+  <br>
+  <button id="start">Speak</button>
+  <button id="stop">Stop!</button>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const msg = new SpeechSynthesisUtterance();
-            let voices = [];
-            const voicesDropdown = document.querySelector('[name="voice"]');
-            const rate = document.querySelector('[name="rate"]');
-            const pitch = document.querySelector('[name="pitch"]');
-            const textArea = document.querySelector('[name="text"]');
-            const startButton = document.getElementById('start');
-            const stopButton = document.getElementById('stop');
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const msg = new SpeechSynthesisUtterance();
+      let voices = [];
+      const voicesDropdown = document.querySelector('[name="voice"]');
+      const rate = document.querySelector('[name="rate"]');
+      const pitch = document.querySelector('[name="pitch"]');
+      const textArea = document.querySelector('[name="text"]');
+      const startButton = document.getElementById('start');
+      const stopButton = document.getElementById('stop');
 
-            msg.text = textArea.value;
+      function populateVoices() {
+        voices = speechSynthesis.getVoices(); // Get voices from the SpeechSynthesis API
+        voicesDropdown.innerHTML = voices
+          .filter(voice => voice.lang.includes('en')) // Filter for English voices
+          .map(voice => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`)
+          .join('');
+      }
 
-            function populateVoices() {
-                voices = this.getVoices();
-                voicesDropdown.innerHTML = voices
-                    .filter(voice => voice.lang.includes('en'))
-                    .map(voice => `<option value="${voice.name}">${voice.name} (${voice.lang})</option>`)
-                    .join('');
-            }
+      function setVoice() {
+        msg.voice = voices.find(voice => voice.name === this.value);
+      }
 
-            function setVoice() {
-                msg.voice = voices.find(voice => voice.name === this.value);
-                toggle();
-            }
+      function toggle(startOver = true) {
+        speechSynthesis.cancel();
+        if (startOver) {
+          speechSynthesis.speak(msg);
+        }
+      }
 
-            function toggle(startOver = true) {
-                speechSynthesis.cancel();
-                if (startOver) {
-                    speechSynthesis.speak(msg);
-                }
-            }
+      function setOption() {
+        msg[this.name] = this.value;
+      }
 
-            function setOption() {
-                msg[this.name] = this.value;
-                toggle();
-            }
+      speechSynthesis.addEventListener('voiceschanged', populateVoices);
+      voicesDropdown.addEventListener('change', setVoice);
+      rate.addEventListener('change', setOption);
+      pitch.addEventListener('change', setOption);
+      textArea.addEventListener('input', () => {
+        msg.text = textArea.value; // Update text when changed
+      });
 
-            speechSynthesis.addEventListener('voiceschanged', populateVoices);
-            voicesDropdown.addEventListener('change', setVoice);
-            rate.addEventListener('change', setOption);
-            pitch.addEventListener('change', setOption);
-
-            startButton.addEventListener('click', () => toggle());
-            stopButton.addEventListener('click', () => toggle(false));
-        });
-    </script>
+      startButton.addEventListener('click', () => toggle());
+      stopButton.addEventListener('click', () => toggle(false));
+    });
+  </script>
 </body>
 </html>
